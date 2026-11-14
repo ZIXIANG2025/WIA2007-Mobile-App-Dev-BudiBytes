@@ -5,7 +5,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.auth.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -13,17 +13,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DashboardActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".CampusHomeActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".HazardMapActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".ReportSubmissionActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".MyReportsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".AllReportsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".RiskOverviewActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".MaintenanceTasksActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".AnalyticsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".NotificationsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".SettingsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".ReportDetailsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.dashboard.DashboardActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.dashboard.CampusHomeActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.hazardmap.HazardMapActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.report.ReportSubmissionActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.myreports.MyReportsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.admin.AllReportsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.riskoverview.RiskOverviewActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.admin.MaintenanceTasksActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.admin.AnalyticsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.notifications.NotificationsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.settings.SettingsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.reportdetails.ReportDetailsActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
     </application>
 </manifest>

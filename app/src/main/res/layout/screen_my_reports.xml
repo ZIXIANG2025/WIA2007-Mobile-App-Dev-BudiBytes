@@ -1,9 +1,234 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_root_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:orientation="vertical"
+    tools:context="com.um.rainguard.ui.myreports.MyReportsActivity"
+    tools:theme="@style/AppTheme">
 
+    <!-- Workspace Header & Disclaimer -->
     <include
-        layout="@layout/activity_main"
+        android:id="@+id/workspace_header"
+        layout="@layout/include_workspace_header" />
+
+    <ScrollView
+        android:id="@+id/page_scroll"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-</FrameLayout>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/page_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="24dp">
+
+            <TextView
+                android:id="@+id/reports_header_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Your drainage reports"
+                android:textColor="#0F172A"
+                android:textSize="23sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/reports_header_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Updates from the maintenance team"
+                android:textColor="#667986"
+                android:textSize="13sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <!-- Filters -->
+            <EditText
+                android:id="@+id/reports_search_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:autofillHints="none"
+                android:background="@drawable/secondary_button_background"
+                android:hint="Search ID or location..."
+                android:inputType="text"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="10dp"
+                android:singleLine="true"
+                android:textColor="#0F172A"
+                android:textColorHint="#667986" />
+
+            <Spinner
+                android:id="@+id/reports_status_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/card_background"
+                android:padding="6dp" />
+
+            <Spinner
+                android:id="@+id/reports_category_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/card_background"
+                android:padding="6dp" />
+
+            <Spinner
+                android:id="@+id/reports_risk_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/card_background"
+                android:padding="6dp" />
+
+            <EditText
+                android:id="@+id/reports_date_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:autofillHints="none"
+                android:background="@drawable/secondary_button_background"
+                android:hint="dd/mm/yyyy 📅"
+                android:inputType="date"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="10dp"
+                android:singleLine="true"
+                android:textColor="#0F172A"
+                android:textColorHint="#667986" />
+
+            <TextView
+                android:id="@+id/reports_empty_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No reports match your search."
+                android:textColor="#667986"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <!-- Table Scroll Area -->
+            <HorizontalScrollView
+                android:id="@+id/reports_table_scroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/card_background"
+                    android:orientation="vertical">
+
+                    <!-- Table Header -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="#EBF3F5"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="10dp">
+
+                        <TextView
+                            android:layout_width="180dp"
+                            android:layout_height="wrap_content"
+                            android:text="Report / Location"
+                            android:textColor="#475569"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:text="Category"
+                            android:textColor="#475569"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:text="Risk"
+                            android:textColor="#475569"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:text="Status"
+                            android:textColor="#475569"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:text="Action"
+                            android:textColor="#475569"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Table Rows Container -->
+                    <LinearLayout
+                        android:id="@+id/reports_table_body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Scroll Track Bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="◄"
+                    android:textColor="#94A3B8"
+                    android:textSize="10sp"
+                    tools:ignore="HardcodedText" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="6dp"
+                    android:layout_marginHorizontal="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/secondary_button_background" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="►"
+                    android:textColor="#94A3B8"
+                    android:textSize="10sp"
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom Navigation -->
+    <LinearLayout
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@color/surface"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="4dp" />
+</LinearLayout>
