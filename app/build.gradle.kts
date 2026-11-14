@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.budibytes"
+    namespace = "com.um.rainguard"
     compileSdk {
         version = release(37)
     }
