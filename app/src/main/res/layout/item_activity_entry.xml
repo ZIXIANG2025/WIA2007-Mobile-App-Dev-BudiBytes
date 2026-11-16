@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingVertical="4dp">
+
+    <TextView
+        android:layout_width="24dp"
+        android:layout_height="wrap_content"
+        android:text="●"
+        android:textColor="#075985"
+        android:textSize="10sp"
+        tools:ignore="HardcodedText" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/activity_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#172B3A"
+            android:textSize="13sp"
+            tools:text="RG-1042 · Report submitted." />
+
+        <TextView
+            android:id="@+id/activity_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#667986"
+            android:textSize="11sp"
+            tools:text="2026-10-24 14:00" />
+    </LinearLayout>
+</LinearLayout>

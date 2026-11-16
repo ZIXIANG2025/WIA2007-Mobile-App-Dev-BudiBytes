@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_root_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:orientation="vertical"
+    tools:context="com.um.rainguard.ui.reportdetails.ReportDetailsActivity"
+    tools:theme="@style/AppTheme">
+
+    <!-- Header & Disclaimer -->
+    <include
+        android:id="@+id/workspace_header"
+        layout="@layout/include_workspace_header" />
+
+    <ScrollView
+        android:id="@+id/page_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/page_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="24dp">
+
+            <TextView
+                android:id="@+id/detail_header_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#667986"
+                android:textSize="12sp"
+                tools:text="RG-1042 · 2026-10-24, 16:12 MYT" />
+
+            <TextView
+                android:id="@+id/detail_place_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#0F172A"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                tools:text="Faculty of Engineering, Block A" />
+
+            <!-- Status & Risk Pills Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/detail_risk_tag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="12dp"
+                    android:textColor="#B43518"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    tools:ignore="RtlSymmetry"
+                    tools:text="High risk" />
+
+                <TextView
+                    android:id="@+id/detail_status_pill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:textColor="#075985"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    tools:text="In progress" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
+                android:background="#D9E3E9" />
+
+            <!-- Original Report Section -->
+            <TextView
+                android:id="@+id/detail_original_category"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#667986"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                tools:text="ORIGINAL REPORT · CLOGGED" />
+
+            <TextView
+                android:id="@+id/detail_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#0F172A"
+                android:textSize="14sp"
+                tools:text="Clogged observed after rainfall. Please inspect the drainage channel." />
+
+            <TextView
+                android:id="@+id/detail_no_photo_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="📷  No photo attached"
+                android:textColor="#667986"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:id="@+id/detail_photo_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
+                android:background="#D9E3E9" />
+
+            <!-- Safety Advice Card -->
+            <LinearLayout
+                android:id="@+id/detail_safety_advice_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/warning_background"
+                android:orientation="horizontal"
+                android:padding="14dp">
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="match_parent"
+                    android:background="#D97706" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingStart="12dp"
+                    tools:ignore="RtlSymmetry">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Safety advice"
+                        android:textColor="#0F172A"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Avoid flooded or slippery walkways. Use covered routes. Do not enter flowing water or approach electrical equipment near ponding."
+                        android:textColor="#334155"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
+                android:background="#D9E3E9" />
+
+            <!-- Maintenance Progress Section -->
+            <LinearLayout
+                android:id="@+id/detail_maintenance_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Maintenance progress"
+                    android:textColor="#0F172A"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/detail_team_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="#0F172A"
+                    android:textSize="13sp"
+                    tools:text="Responsible team: JPPHB Drainage Team" />
+
+                <TextView
+                    android:id="@+id/detail_task_status_pill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:textColor="#0284C7"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    tools:text="Inspection in Progress" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Completed maintenance tasks officially change the report to Resolved."
+                    android:textColor="#667986"
+                    android:textSize="12sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="#D9E3E9" />
+            </LinearLayout>
+
+            <!-- Report History Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Report history &amp; updates"
+                android:textColor="#0F172A"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/detail_history_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical" />
+
+            <!-- Community Observations Section -->
+            <LinearLayout
+                android:id="@+id/detail_community_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Community observations"
+                    android:textColor="#0F172A"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_detail_still_there"
+                        android:layout_width="0dp"
+                        android:layout_height="42dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/primary_button_background"
+                        android:text="Still There (14)"
+                        android:textAllCaps="false"
+                        android:textColor="@color/surface"
+                        android:textSize="13sp" />
+
+                    <Button
+                        android:id="@+id/btn_detail_cleared"
+                        android:layout_width="0dp"
+                        android:layout_height="42dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/secondary_button_background"
+                        android:text="Cleared (0)"
+                        android:textAllCaps="false"
+                        android:textColor="#0F172A"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Community observations do not change the official report status."
+                    android:textColor="#667986"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- Admin Review Section -->
+            <LinearLayout
+                android:id="@+id/detail_admin_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <!-- AI Summary Card -->
+                <LinearLayout
+                    android:id="@+id/detail_admin_summary_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:background="@drawable/card_background"
+                    android:orientation="vertical"
+                    android:padding="15dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="✦  AI-assisted review"
+                        android:textColor="#075985"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Demo rule-based output · not a live AI model"
+                        android:textColor="#667986"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/detail_ai_summary_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="#172B3A"
+                        android:textSize="13sp"
+                        tools:text="Generate a draft summary to support your review." />
+
+                    <Button
+                        android:id="@+id/btn_generate_summary"
+                        android:layout_width="match_parent"
+                        android:layout_height="36dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/secondary_button_background"
+                        android:text="Generate Summary"
+                        android:textAllCaps="false"
+                        android:textColor="#075985"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/detail_suggested_risk_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:textColor="#172B3A"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        tools:text="Suggested risk: High" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Sample rainfall intensity peaks at 18 mm/h. Affects drainage capacity and pedestrian access."
+                        android:textColor="#667986"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="The administrator makes the final decision. This summary never verifies, assigns or resolves reports."
+                        android:textColor="#667986"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <!-- Duplicates Box -->
+                <LinearLayout
+                    android:id="@+id/detail_duplicate_box"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:background="@drawable/card_background"
+                    android:orientation="vertical"
+                    android:padding="15dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Duplicate-report suggestions"
+                        android:textColor="#172B3A"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:id="@+id/detail_duplicates_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Review descriptions before deciding whether reports describe the same incident."
+                        android:textColor="#667986"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <!-- Admin Action Buttons -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="Administrator actions"
+                    android:textColor="#172B3A"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_admin_under_review"
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:layout_marginBottom="6dp"
+                    android:background="@drawable/secondary_button_background"
+                    android:text="Under Review"
+                    android:textAllCaps="false"
+                    android:textColor="#075985"
+                    android:textSize="11sp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_admin_verify"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="6dp"
+                    android:background="@drawable/primary_button_background"
+                    android:text="Verify Report"
+                    android:textAllCaps="false"
+                    android:textColor="@color/surface"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_admin_reject"
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:layout_marginBottom="6dp"
+                    android:background="@drawable/secondary_button_background"
+                    android:text="Reject Report"
+                    android:textAllCaps="false"
+                    android:textColor="#075985"
+                    android:textSize="11sp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_admin_assign"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="6dp"
+                    android:background="@drawable/primary_button_background"
+                    android:text="⚒  Assign Maintenance"
+                    android:textAllCaps="false"
+                    android:textColor="@color/surface"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_admin_update_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:layout_marginBottom="6dp"
+                    android:background="@drawable/secondary_button_background"
+                    android:text="Update Progress"
+                    android:textAllCaps="false"
+                    android:textColor="#075985"
+                    android:textSize="11sp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_admin_complete"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="6dp"
+                    android:background="@drawable/primary_button_background"
+                    android:text="✓  Mark as Completed"
+                    android:textAllCaps="false"
+                    android:textColor="@color/surface"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btn_admin_add_photo"
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:layout_marginBottom="6dp"
+                    android:background="@drawable/secondary_button_background"
+                    android:text="Add inspection / completion photo"
+                    android:textAllCaps="false"
+                    android:textColor="#075985"
+                    android:textSize="11sp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/detail_closed_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="This report is closed."
+                    android:textColor="#667986"
+                    android:textSize="13sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom Navigation -->
+    <LinearLayout
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@color/surface"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="4dp" />
+</LinearLayout>

@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_root_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:orientation="vertical"
+    tools:context="com.um.rainguard.ui.dashboard.DashboardActivity"
+    tools:theme="@style/AppTheme">
+
+    <!-- Workspace Header & Disclaimer -->
+    <include
+        android:id="@+id/workspace_header"
+        layout="@layout/include_workspace_header" />
+
+    <ScrollView
+        android:id="@+id/page_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/page_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="24dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Campus drainage operations"
+                android:textColor="#0F172A"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Review hazards. Coordinate maintenance. Keep campus moving."
+                android:textColor="#667986"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/secondary_button_background"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:text="Admin / Maintenance Team"
+                android:textColor="#075985"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- Stats Grid (6 Cards) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:orientation="horizontal">
+
+                <!-- Card 1: All submitted -->
+                <LinearLayout
+                    android:id="@+id/admin_stat_all_submitted_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/card_background"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="All submitted"
+                        android:textColor="#667986"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/admin_stat_all_submitted"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#0F172A"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        tools:text="5" />
+                </LinearLayout>
+
+                <!-- Card 2: Awaiting review -->
+                <LinearLayout
+                    android:id="@+id/admin_stat_awaiting_review_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/card_background"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Awaiting review"
+                        android:textColor="#667986"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/admin_stat_awaiting_review"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#0F172A"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        tools:text="2" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:orientation="horizontal">
+
+                <!-- Card 3: Verified active -->
+                <LinearLayout
+                    android:id="@+id/admin_stat_verified_active_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/card_background"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Verified active"
+                        android:textColor="#667986"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/admin_stat_verified_active"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#0F172A"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        tools:text="1" />
+                </LinearLayout>
+
+                <!-- Card 4: High-risk incidents -->
+                <LinearLayout
+                    android:id="@+id/admin_stat_high_risk_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/card_background"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="High-risk incidents"
+                        android:textColor="#667986"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/admin_stat_high_risk"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#0F172A"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        tools:text="2" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:orientation="horizontal">
+
+                <!-- Card 5: In progress -->
+                <LinearLayout
+                    android:id="@+id/admin_stat_in_progress_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/card_background"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="In progress"
+                        android:textColor="#667986"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/admin_stat_in_progress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#0F172A"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        tools:text="1" />
+                </LinearLayout>
+
+                <!-- Card 6: Resolved -->
+                <LinearLayout
+                    android:id="@+id/admin_stat_resolved_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/card_background"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Resolved"
+                        android:textColor="#667986"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/admin_stat_resolved"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#0F172A"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        tools:text="1" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Pre-rain Inspection Priority Box -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="18dp"
+                android:background="@drawable/warning_background"
+                android:orientation="horizontal"
+                android:padding="14dp">
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="match_parent"
+                    android:background="#D97706" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingStart="12dp"
+                    tools:ignore="RtlSymmetry">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Pre-rain inspection priority"
+                        android:textColor="#0F172A"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Sample forecast peaks at 2 PM. Prioritise blocked culverts near Engineering and the KK8 walkway."
+                        android:textColor="#334155"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- All Drainage Reports Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="All drainage reports"
+                android:textColor="#0F172A"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/admin_reports_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="3 reports · Review, verify and coordinate a response"
+                android:textColor="#667986"
+                android:textSize="13sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <!-- Filters -->
+            <EditText
+                android:id="@+id/admin_search_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:autofillHints="none"
+                android:background="@drawable/secondary_button_background"
+                android:hint="Search ID or location..."
+                android:inputType="text"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="10dp"
+                android:singleLine="true"
+                android:textColor="#0F172A"
+                android:textColorHint="#667986" />
+
+            <Spinner
+                android:id="@+id/admin_status_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/card_background"
+                android:padding="6dp" />
+
+            <Spinner
+                android:id="@+id/admin_category_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/card_background"
+                android:padding="6dp" />
+
+            <Spinner
+                android:id="@+id/admin_risk_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/card_background"
+                android:padding="6dp" />
+
+            <EditText
+                android:id="@+id/admin_date_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:autofillHints="none"
+                android:background="@drawable/secondary_button_background"
+                android:hint="dd/mm/yyyy 📅"
+                android:inputType="date"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="10dp"
+                android:singleLine="true"
+                android:textColor="#0F172A"
+                android:textColorHint="#667986" />
+
+            <TextView
+                android:id="@+id/admin_reports_empty_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No reports match your search."
+                android:textColor="#667986"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <!-- Table Scroll Area -->
+            <HorizontalScrollView
+                android:id="@+id/admin_table_scroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/card_background"
+                    android:orientation="vertical">
+
+                    <!-- Table Header -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="#EBF3F5"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="10dp">
+
+                        <TextView
+                            android:layout_width="180dp"
+                            android:layout_height="wrap_content"
+                            android:text="Report / Location"
+                            android:textColor="#475569"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:text="Category"
+                            android:textColor="#475569"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="90dp"
+                            android:layout_height="wrap_content"
+                            android:text="Risk"
+                            android:textColor="#475569"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:text="Status"
+                            android:textColor="#475569"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:text="Action"
+                            android:textColor="#475569"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Table Rows Container -->
+                    <LinearLayout
+                        android:id="@+id/admin_table_body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Scroll Track Bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="◄"
+                    android:textColor="#94A3B8"
+                    android:textSize="10sp"
+                    tools:ignore="HardcodedText" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="6dp"
+                    android:layout_marginHorizontal="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/secondary_button_background" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="►"
+                    android:textColor="#94A3B8"
+                    android:textSize="10sp"
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="18dp" />
+
+            <!-- Recent Activity Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Recent activity"
+                android:textColor="#0F172A"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/admin_recent_activity_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom Navigation -->
+    <LinearLayout
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@color/surface"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="4dp" />
+</LinearLayout>

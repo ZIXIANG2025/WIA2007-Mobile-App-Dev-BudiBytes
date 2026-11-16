@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.budibytes"
+    namespace = "com.um.rainguard"
     compileSdk {
         version = release(37)
     }
@@ -24,6 +24,9 @@ android {
                 enable = false
             }
         }
+    }
+    buildFeatures {
+        viewBinding = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

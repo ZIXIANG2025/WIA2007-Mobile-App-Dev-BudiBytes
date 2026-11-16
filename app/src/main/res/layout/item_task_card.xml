@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/card_background"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/task_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#172B3A"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        tools:text="RG-1042 · Faculty of Engineering, Block A" />
+
+    <TextView
+        android:id="@+id/task_team"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="#667986"
+        android:textSize="12sp"
+        tools:text="JPPHB Drainage Team" />
+
+    <TextView
+        android:id="@+id/task_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="#075985"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        tools:text="Inspection in Progress · In progress" />
+
+    <TextView
+        android:id="@+id/task_instructions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="#667986"
+        android:textSize="12sp"
+        tools:text="Inspect the box culvert and clear fallen leaves." />
+</LinearLayout>

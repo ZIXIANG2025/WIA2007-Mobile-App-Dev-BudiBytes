@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="20dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="4dp">
+
+    <!-- Team Selection (Assign action) -->
+    <TextView
+        android:id="@+id/dialog_team_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Responsible team"
+        android:textColor="#172B3A"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <Spinner
+        android:id="@+id/dialog_team_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/card_background"
+        android:padding="6dp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <!-- Status Selection (Progress action) -->
+    <TextView
+        android:id="@+id/dialog_status_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Task status"
+        android:textColor="#172B3A"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <Spinner
+        android:id="@+id/dialog_status_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/card_background"
+        android:padding="6dp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <!-- Notes Input -->
+    <TextView
+        android:id="@+id/dialog_notes_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notes"
+        android:textColor="#172B3A"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/dialog_notes_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:autofillHints="none"
+        android:background="@drawable/secondary_button_background"
+        android:gravity="top|start"
+        android:hint="Enter notes..."
+        android:inputType="textMultiLine"
+        android:minLines="3"
+        android:padding="10dp"
+        android:textColor="#0F172A"
+        android:textColorHint="#667986" />
+</LinearLayout>

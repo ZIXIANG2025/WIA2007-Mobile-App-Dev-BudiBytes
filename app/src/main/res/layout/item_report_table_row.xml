@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="12dp">
+
+    <!-- Col 1: ID & Location -->
+    <LinearLayout
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/row_report_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#0F172A"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="RG-1042" />
+
+        <TextView
+            android:id="@+id/row_report_place"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#475569"
+            android:textSize="12sp"
+            tools:text="Faculty of Engineering" />
+
+        <TextView
+            android:id="@+id/row_report_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#667986"
+            android:textSize="11sp"
+            tools:text="2026-10-24, 16:12" />
+    </LinearLayout>
+
+    <!-- Col 2: Category -->
+    <TextView
+        android:id="@+id/row_report_category"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:textColor="#0F172A"
+        android:textSize="13sp"
+        tools:text="Clogged" />
+
+    <!-- Col 3: Risk -->
+    <TextView
+        android:id="@+id/row_report_risk"
+        android:layout_width="90dp"
+        android:layout_height="wrap_content"
+        android:textColor="#B43518"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        tools:text="High risk" />
+
+    <!-- Col 4: Status -->
+    <TextView
+        android:id="@+id/row_report_status"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
+        android:textColor="#075985"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        tools:text="In progress" />
+
+    <!-- Col 5: Action Button -->
+    <Button
+        android:id="@+id/row_btn_view_details"
+        android:layout_width="100dp"
+        android:layout_height="36dp"
+        android:background="@drawable/secondary_button_background"
+        android:text="View Details"
+        android:textAllCaps="false"
+        android:textColor="#0F172A"
+        android:textSize="11sp" />
+</LinearLayout>
