@@ -120,7 +120,7 @@ rejected or rewritten>
 |---|---|
 | **Date** | 2026-11-18 (Asia/Kuala_Lumpur) |
 | **Author** | BudiBytes team (commit author) |
-| **Commit** | `TBD` — `feat(data): move screens to Room and split models out of the database package` |
+| **Commit** | `3173939` — feat(data): run every screen on Room and move the models out of the database package |
 | **Tool** | DeepSeek Harness (`dsh`) coding agent, model `deepseek-flash`, web interface |
 | **AI used for** | `docs/` (conversion, review, usage log), `data/repository/`, 12 Activities, `database/` edits, package relocation |
 | **Verification** | Gradle compile and APK build pass; docx-to-Markdown compared character by character; the `INSERT OR REPLACE` failure reproduced in SQLite; Room identity hash compared before and after the move. **Not run on a device.** |
@@ -194,3 +194,57 @@ rejected or rewritten>
   and Module 5 queries (DB-F-05, DB-F-06), no `Result<T>` or ViewModel (DB-F-07), destructive
   migration (DB-F-08).
 * The sign-in is still the demo one; "real login" is recorded as a decision but not implemented.
+
+### AI-2026-11-18-02 — Root README rewritten as the development guide
+
+| | |
+|---|---|
+| **Date** | 2026-11-18 (Asia/Kuala_Lumpur) |
+| **Author** | BudiBytes team (commit author) |
+| **Commit** | `TBD` — `docs: explain how to use docs/ while developing` |
+| **Tool** | DeepSeek Harness (`dsh`) coding agent, model `deepseek-flash`, web interface |
+| **AI used for** | `README.md` (repository root); two wording corrections in `docs/database-layer.md` |
+| **Verification** | Every relative link and every Markdown table in the root README checked by script; `docs/` lint clean. No source file changed, so no build was run. |
+| **Human changes** | The author asked for the section, chose what a new teammate needs to know, and reviewed the wording; no code or behaviour changed |
+
+**Prompts**
+
+> 1. "alright, now update the root directory README on how to use the documentation in doc/ when they
+>    develop"
+
+**What the AI produced**
+
+* `README.md` — replaces the three-line stub (which also carried the typo recorded as DB-F-14) with a
+  development guide: quick start (toolchain, build, demo sign-in, first-launch seed, how to reset),
+  *How to use `docs/` while you develop* (which document for which task, a before-you-code checklist,
+  a change-to-document table, three rules that keep the docs readable), repository layout, pre-push
+  checks, and the AI-01 rule.
+* `docs/database-layer.md` — DB-F-14 marked **Fixed**, and "every data-driven screen" replaces the
+  count "all twelve".
+
+**How it was checked**
+
+* A script resolved every relative link in the root `README.md` and re-checked the cell count of each
+  Markdown table; `docs/` passes the same lint used for the other documents. No broken link, no
+  malformed table.
+* Nothing under `app/` was touched in this change, so the previous build result still stands and no
+  device run was required.
+
+**What stayed human**
+
+* What the guide should teach, which credentials and paths it publishes, and the review of its tone
+  were the author's calls. The AI did not decide how the team works.
+
+**Correction**
+
+Entry AI-2026-11-18-01 says that 12 Activities were converted. It is 10 files plus two shared ones:
+the ten edited Activity files are `CampusHome`, `Dashboard`, `MyReports`, `Notifications`,
+`HazardMap`, `MaintenanceTasks`, `Analytics`, `RiskOverview`, `ReportSubmission` and `ReportDetails`;
+`AllReportsActivity` inherits the change from `MyReportsActivity` and was not edited, and
+`BaseActivity` and `MapSketchView` are counted separately.
+
+**Follow-ups**
+
+* Run the app on a device: first launch seeding, community votes, and the admin verify → assign →
+  resolve path.
+* `docs/database-layer.md` still carries the open findings DB-F-04 to DB-F-12.
