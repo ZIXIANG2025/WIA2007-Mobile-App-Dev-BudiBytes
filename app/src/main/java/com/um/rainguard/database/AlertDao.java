@@ -1,5 +1,7 @@
 package com.um.rainguard.database;
 
+import com.um.rainguard.data.model.Alert;
+
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;

@@ -1,4 +1,4 @@
-package com.um.rainguard.database;
+package com.um.rainguard.data.model;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

@@ -1,11 +1,14 @@
 package com.um.rainguard.database;
 
+import com.um.rainguard.data.model.HazardPublic;
+import com.um.rainguard.data.model.Report;
+import com.um.rainguard.data.model.ReportStatus;
+
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 
@@ -16,7 +19,14 @@ public interface ReportDao {
     String PUBLIC_COLUMNS = "reportId, category, severity, description, photoUri, latitude, longitude, "
             + "locationName, zone, status, createdAt, stillThereCount, clearedCount";
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    /**
+     * Insert a new report, or update the existing row with the same reportId.
+     *
+     * <p>This is {@code @Upsert}, not {@code INSERT OR REPLACE}: REPLACE deletes the conflicting
+     * row first, and because ai_triage and verification_logs cascade on delete that would wipe the
+     * report's AI row and its whole audit trail.
+     */
+    @Upsert
     void upsert(Report report);
 
     @Update
@@ -24,6 +34,12 @@ public interface ReportDao {
 
     @Query("SELECT * FROM reports WHERE reportId = :reportId")
     Report getById(String reportId);
+
+    @Query("SELECT * FROM reports WHERE reportId = :reportId")
+    LiveData<Report> observeById(String reportId);
+
+    @Query("SELECT COUNT(*) FROM reports")
+    int count();
 
     // Module 1: "Get My Reports"
     @Query("SELECT * FROM reports WHERE reporterId = :userId ORDER BY createdAt DESC")
@@ -51,6 +67,9 @@ public interface ReportDao {
 
     @Query("UPDATE reports SET status = :status, updatedAt = :now WHERE reportId = :reportId")
     void updateStatus(String reportId, ReportStatus status, long now);
+
+    @Query("UPDATE reports SET updatedAt = :now WHERE reportId = :reportId")
+    void touch(String reportId, long now);
 
     // Community confirmation (UI: Still There / Cleared)
     @Query("UPDATE reports SET stillThereCount = stillThereCount + 1 WHERE reportId = :reportId")

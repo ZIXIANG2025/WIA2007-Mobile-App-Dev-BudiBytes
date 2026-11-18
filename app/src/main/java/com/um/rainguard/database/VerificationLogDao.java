@@ -1,5 +1,7 @@
 package com.um.rainguard.database;
 
+import com.um.rainguard.data.model.VerificationLog;
+
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
@@ -11,6 +13,9 @@ import java.util.List;
 public interface VerificationLogDao {
     @Insert
     void insert(VerificationLog log);
+
+    @Insert
+    void insertAll(List<VerificationLog> logs);
 
     @Query("SELECT * FROM verification_logs WHERE reportId = :reportId ORDER BY createdAt ASC")
     LiveData<List<VerificationLog>> observeForReport(String reportId);

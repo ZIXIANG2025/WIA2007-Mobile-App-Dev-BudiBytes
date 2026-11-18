@@ -1,5 +1,8 @@
 package com.um.rainguard.database;
 
+import com.um.rainguard.data.model.User;
+
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -18,6 +21,12 @@ public interface UserDao {
     @Query("SELECT * FROM users WHERE userId = :userId")
     User getById(String userId);
 
+    @Query("SELECT * FROM users WHERE userId = :userId")
+    LiveData<User> observeById(String userId);
+
     @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
     User getByEmail(String email);
+
+    @Query("SELECT COUNT(*) FROM users")
+    int count();
 }

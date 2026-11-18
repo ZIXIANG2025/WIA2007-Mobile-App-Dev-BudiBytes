@@ -275,13 +275,13 @@ No P0 was found — the PR compiles and Room's query verification passes.
 
 | ID | Sev. | Finding | Where |
 |---|---|---|---|
-| DB-F-01 | **P1** | `ReportDao.upsert()` is `INSERT OR REPLACE`. Both child tables cascade on delete and Room enables `PRAGMA foreign_keys`, so re-saving an existing report **deletes its `ai_triage` row and its entire `verification_logs` timeline** — the audit trail MS-01 Module 4 requires. Reproduced: `(reports, logs) = (1, 1)` before, `(1, 0)` after. | `ReportDao.java:19-20` |
-| DB-F-02 | **P1** | No `@Transaction` anywhere. Every Module 4 action is two calls (status + log row); if the second fails the report has moved with no audit row, contradicting "each action adds exactly one `VerificationLog` row". | all DAOs |
-| DB-F-03 | **P1** | Nothing reads this database, and the layer it competes with is already live: `BaseActivity` builds `data.repository.ReportRepository` (in-memory list, persisted as JSON in `SharedPreferences`) over `data.model.ReportItem` for 12 of the 13 Activities, and 10 call it directly. No code calls `RainGuardDatabase.getInstance()`. Two models of one object — full comparison in §5. | `ui/**`, `data/**` |
+| DB-F-01 | **P1** | **Fixed.** `upsert()` is now `@Upsert`, which updates the existing row instead of replacing it, so the cascade never fires. Originally `INSERT OR REPLACE`: re-saving a report destroyed its `ai_triage` row and its whole `verification_logs` timeline (reproduced `(1, 1)` → `(1, 0)`). | `ReportDao.java` |
+| DB-F-02 | **P1** | **Fixed.** Every multi-table write in `ReportRepository` now runs inside `database.runInTransaction(...)`, so the status change and its `verification_logs` row commit together. | `ReportRepository` |
+| DB-F-03 | **P1** | **Fixed.** All twelve data screens read Room through `ReportRepository`; `ReportItem`, `HistoryEntry` and the JSON repository are deleted. §5 records what the old layer looked like. | `ui/**`, `data/**` |
 | DB-F-04 | **P2** | The picture-map coordinates are stored but cannot be read publicly: `HazardPublic` and `PUBLIC_COLUMNS` omit `pinX`/`pinY`, and `Report.toPublic()` does not copy them. MS-01 Module 2 says "the database stores both, so either works" — today only the lat/long route works. | `HazardPublic.java`, `ReportDao.java:16` |
 | DB-F-05 | **P2** | Module 2's filters and counts have no query (`getMapHazards`, `getHazardCounts`). | `ReportDao` |
 | DB-F-06 | **P2** | Module 5's alert contract is incomplete: `observeActive()` filters only `isActive`, so expired alerts still show and per-user zone filtering is impossible at query level. | `AlertDao.java:19` |
-| DB-F-07 | **P2** | The language mismatch is now closed — MS-01 was updated on 18 Nov 2026 to record **Java 11** as decided — but the layering is still missing: no Repository or ViewModel exists in any module package, `Result<T>` is not implemented anywhere, and the DAOs return `void`, so a caller cannot tell success from failure. | whole PR |
+| DB-F-07 | **P2** | **Partly fixed.** A Repository layer now exists (`ReportRepository` over the DAOs) and the language is settled as Java 11. Still missing: `Result<T>`, a ViewModel per module, and any way for a caller to tell a failed write from a successful one. | `data/repository` |
 | DB-F-08 | **P2** | `exportSchema = false` + `fallbackToDestructiveMigration()`: no schema history to diff or test, and any `version` bump silently wipes every row. Fine for a demo, must not ship. | `RainGuardDatabase.java:30,53` |
 | DB-F-09 | **P3** | Module 4 analytics and each module's Repository remain unimplemented (expected — module owners are `TBD`). | — |
 | DB-F-10 | **P3** | `reports.reporterId`, `verification_logs.actorId` and `alerts.createdBy` are not foreign keys, so referential integrity is entirely the repositories' job. Reasonable for privacy and for a future cloud sync; it should be written down. | entities |
@@ -354,3 +354,42 @@ On this machine the build needs `JAVA_HOME` set to a real JDK: the inherited val
    visible the first time anyone inspects `rainguard.db` on a device.
 5. **When does the database stop being disposable?** `fallbackToDestructiveMigration()` is the right
    default while the schema churns; name the commit after which migrations are mandatory.
+
+## 9. What changed after this review
+
+The findings above were written against PR #4 as it was opened. Two follow-ups were then done in the
+working tree; they close DB-F-01, DB-F-02 and DB-F-03, and most of DB-F-07.
+
+### 9.1 The app reads and writes Room
+
+* `data/repository/ReportRepository` is now a Room-backed repository. It observes
+  `ReportDao.observeAll()` once, republishes it as `LiveData<List<Report>>`, keeps a synchronous
+  snapshot for the existing render paths, and performs every write on
+  `RainGuardDatabase.databaseExecutor` inside `database.runInTransaction(...)`.
+* All twelve data screens observe that `LiveData` and re-render; nothing reads a JSON blob any more.
+  `ReportItem`, `HistoryEntry` and the old `SharedPreferences` repository are deleted.
+* Notification preferences and subscribed zones moved from `SharedPreferences` into the `users` row
+  (`savePreferences`), and the zone list now comes from `CampusZones.ALL` instead of a second
+  hard-coded array in `BaseActivity`.
+* `data/repository/DemoData` seeds five reports, three accounts, their `ai_triage` rows and the admin
+  actions that produced their state, so the demo still opens with content.
+
+### 9.2 The model classes left the database package
+
+| Package | Holds |
+|---|---|
+| `com.um.rainguard.data.model` | `Report`, `User`, `AiTriage`, `VerificationLog`, `Alert`, `HazardPublic`, the nine enums, `CampusZones`, `MaintenanceTeams` |
+| `com.um.rainguard.database` | `RainGuardDatabase` and the five DAOs — persistence only |
+
+**No migration is needed.** Room derives its identity hash from the schema (table names, columns,
+keys, indices), not from class packages, so moving a class between packages leaves `room_master_table`
+untouched. The regenerated `RainGuardDatabase_Impl` still writes
+`identity_hash = 2495d47b88651f48784e1474dcf1579b` — byte-identical to the build before the move, so an
+installed `rainguard.db` stays valid.
+
+### 9.3 Still open
+
+`pinX`/`pinY` are still absent from `HazardPublic` and `PUBLIC_COLUMNS` (DB-F-04); Module 2's filters
+and Module 5's alert query are still thin (DB-F-05, DB-F-06); `Result<T>` and a ViewModel per module
+still do not exist (DB-F-07); the schema is still `exportSchema = false` with destructive migration
+(DB-F-08); and the demo sign-in is still not a real login (open question 1).

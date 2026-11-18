@@ -3,7 +3,9 @@ package com.um.rainguard.ui.riskoverview;
 import android.view.View;
 
 import com.um.rainguard.R;
-import com.um.rainguard.data.model.ReportItem;
+import com.um.rainguard.data.model.Report;
+import com.um.rainguard.data.model.ReportStatus;
+import com.um.rainguard.data.model.Severity;
 import com.um.rainguard.databinding.ItemRiskReportCardBinding;
 import com.um.rainguard.databinding.ScreenRiskOverviewBinding;
 import com.um.rainguard.ui.base.BaseActivity;
@@ -31,46 +33,51 @@ public class RiskOverviewActivity extends BaseActivity {
     @Override
     protected void initView() {
         View rootView = findViewById(R.id.main_root_container);
-        if (rootView != null) {
-            binding = ScreenRiskOverviewBinding.bind(rootView);
-            setupRiskUI();
-        }
+        if (rootView == null) return;
+
+        binding = ScreenRiskOverviewBinding.bind(rootView);
+
+        observe(repository.observeReports(), this::renderRisks);
+        renderRisks(repository.getReports());
     }
 
-    private void setupRiskUI() {
+    private void renderRisks(List<Report> reports) {
         if (binding == null) return;
 
         binding.riskActiveReportsContainer.removeAllViews();
 
-        List<ReportItem> active = new ArrayList<>(repository.getReports());
-        active.removeIf(item -> "Resolved".equals(item.status) || "Rejected".equals(item.status));
-        active.sort(Comparator.comparingInt(item -> riskRank(item.risk)));
+        List<Report> active = new ArrayList<>(reports);
+        active.removeIf(item -> item.status == ReportStatus.RESOLVED || item.status == ReportStatus.REJECTED);
+        active.sort(Comparator.comparingInt(item -> riskRank(item.severity)));
         Collections.reverse(active);
 
         int rank = 1;
-        for (ReportItem item : active) {
+        for (Report item : active) {
             addActiveRiskCard(item, rank++);
         }
     }
 
-    private int riskRank(String risk) {
-        if ("High".equals(risk)) return 3;
-        if ("Medium".equals(risk)) return 2;
+    private int riskRank(Severity severity) {
+        if (severity == Severity.HIGH) return 3;
+        if (severity == Severity.MEDIUM) return 2;
         return 1;
     }
 
-    private void addActiveRiskCard(ReportItem item, int rank) {
+    private void addActiveRiskCard(Report item, int rank) {
         ItemRiskReportCardBinding cardBinding = ItemRiskReportCardBinding.inflate(getLayoutInflater(), binding.riskActiveReportsContainer, false);
+        String risk = UIUtils.riskLabel(item.severity);
 
         cardBinding.riskRankNum.setText(String.valueOf(rank));
-        cardBinding.riskItemPlace.setText(item.place);
-        cardBinding.riskItemSubtitle.setText(item.category + " · " + UIUtils.formatDate(item.createdAt) + ", 16:12");
+        cardBinding.riskItemPlace.setText(item.locationName);
+        cardBinding.riskItemSubtitle.setText(UIUtils.categoryLabel(item.category) + " · " + UIUtils.formatStamp(item.createdAt));
 
-        cardBinding.riskItemTag.setText(item.risk + " risk");
-        cardBinding.riskItemTag.setTextColor(UIUtils.riskColor(item.risk));
+        cardBinding.riskItemTag.setText(risk + " risk");
+        cardBinding.riskItemTag.setTextColor(UIUtils.riskColor(risk));
 
-        cardBinding.riskBtnViewDetails.setOnClickListener(v -> NavigationHelper.navigateTo(this, role, userEmail, "report-details", item.id, currentPage));
-        cardBinding.getRoot().setOnClickListener(v -> NavigationHelper.navigateTo(this, role, userEmail, "report-details", item.id, currentPage));
+        cardBinding.riskBtnViewDetails.setOnClickListener(v -> NavigationHelper.navigateTo(
+                this, role, userEmail, "report-details", item.reportId, currentPage));
+        cardBinding.getRoot().setOnClickListener(v -> NavigationHelper.navigateTo(
+                this, role, userEmail, "report-details", item.reportId, currentPage));
 
         binding.riskActiveReportsContainer.addView(cardBinding.getRoot());
     }

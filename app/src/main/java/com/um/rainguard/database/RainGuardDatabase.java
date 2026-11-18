@@ -1,5 +1,11 @@
 package com.um.rainguard.database;
 
+import com.um.rainguard.data.model.AiTriage;
+import com.um.rainguard.data.model.Alert;
+import com.um.rainguard.data.model.Report;
+import com.um.rainguard.data.model.User;
+import com.um.rainguard.data.model.VerificationLog;
+
 import android.content.Context;
 
 import androidx.room.Database;

@@ -10,6 +10,7 @@ measured against. It is documentation only — nothing here changes runtime beha
 | [database-layer.md](database-layer.md) | **DB-01** | What is the database built on, what are the five tables, which module functions can it already serve, and does PR #4 match MS-01? |
 | [layout-view-hierarchy.md](layout-view-hierarchy.md) | **UI-01** | What View/ViewGroup tree does each screen build, how is it measured, what is styled where, and what should be fixed? |
 | [activity-lifecycle-plan.md](activity-lifecycle-plan.md) | **LC-01** | What happens in `onCreate` / `onPause` / `onBackPressed` / … today, what state is lost, and how will the full lifecycle documentation be written, reviewed and delivered? |
+| [ai-usage-log.md](ai-usage-log.md) | **AI-01** | Which AI tool was used for each commit, with the prompts and how the output was checked and changed — mandatory under UM's Level 2 AI policy. |
 
 ## Reading order
 
@@ -17,7 +18,7 @@ measured against. It is documentation only — nothing here changes runtime beha
    tables, the statuses or the enums. The function tables in modules 1–5 are the contract.
 2. **DB-01 §2–§4** — the stack (SQLite + Room 2.6.1), the five tables, and which of MS-01's 31 module
    functions the DAOs can already serve.
-3. **DB-01 §5** — why the app already has a second data layer: `data/` vs `database/`, side by side,
+3. **DB-01 §5** — the second data layer the app used to have: `data/` vs `database/`, side by side,
    with the field mapping for the migration.
 4. **DB-01 §6** — the review of PR #4 (`DB-F-01` … `DB-F-14`), ordered by severity. Start with
    `DB-F-01` (a save destroys the audit trail) and `DB-F-03` (the database is not wired to the UI).
@@ -45,7 +46,7 @@ measured against. It is documentation only — nothing here changes runtime beha
 | Lifecycle methods overridden | `onCreate` (2 classes), `onBackPressed` (1), `onActivityResult` (2) = **5** |
 | Lifecycle methods absent | `onStart`, `onResume`, `onPause`, `onStop`, `onRestart`, `onDestroy`, `onSaveInstanceState`, `onRestoreInstanceState`, `onNewIntent` |
 | Database tables / DAOs | 5 / 5 (23 files in `com.um.rainguard.database`) |
-| Data layers present | **2** — `data/` (in use by 10 screens) and `database/` (unused, PR #4); see DB-01 §5 |
+| Data layers present | **1** — Room, through `data/repository/ReportRepository`; the JSON layer is gone (DB-01 §9) |
 | Module functions specified / DAO-backed | 31 / 13 fully, 11 partial, 6 none, 1 not a DB concern |
 
 ## Conventions used in these documents
@@ -66,6 +67,7 @@ measured against. It is documentation only — nothing here changes runtime beha
 | Palette / drawable change | UI-01 §10 |
 | New table, column or enum | MS-01 "Database tables used by the modules" + DB-01 §3; bump the `@Database` version |
 | New DAO query or module function | DB-01 §4 table |
-| A screen moves off `ReportItem` and onto Room | Cross off its row in DB-01 §5.2; when the last row goes, delete `data/` and §5 |
+| A new query or write | Add it to `ReportRepository`, never to a screen; DB-01 §4 lists what each DAO serves |
 | A finding is fixed | Move it out of UI-01 §12 / LC-01 §8 / DB-01 §6 and note the fix in the commit message |
+| **Any commit at all** | Append one entry to AI-01 §5 before committing — see the rule in AI-01 §2. No entry, no merge. |
 | The Word specification changes | Update it, then re-run the conversion described in MS-01 Appendix A; if a decision is settled, record it in MS-01 "Open decisions" and list it in Appendix A |

@@ -1,4 +1,4 @@
-package com.um.rainguard.database;
+package com.um.rainguard.data.model;
 
 /** Maintenance task progress (admin side). Null on Report until a team is assigned. */
 public enum TaskStatus {

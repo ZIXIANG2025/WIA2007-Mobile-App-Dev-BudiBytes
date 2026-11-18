@@ -1,4 +1,4 @@
-package com.um.rainguard.database;
+package com.um.rainguard.data.model;
 
 /** Shared by all modules. Never type categories as free strings. */
 public enum ReportCategory {

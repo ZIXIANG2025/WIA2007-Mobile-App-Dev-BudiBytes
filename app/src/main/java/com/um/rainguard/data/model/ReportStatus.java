@@ -1,4 +1,4 @@
-package com.um.rainguard.database;
+package com.um.rainguard.data.model;
 
 import java.util.Arrays;
 import java.util.Collections;
