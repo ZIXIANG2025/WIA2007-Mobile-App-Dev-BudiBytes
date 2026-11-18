@@ -22,10 +22,14 @@ import android.widget.Toast;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.um.rainguard.R;
 import com.um.rainguard.data.repository.ReportRepository;
+import com.um.rainguard.data.model.CampusZones;
+import com.um.rainguard.data.model.User;
 import com.um.rainguard.databinding.BottomSheetPreferencesBinding;
 import com.um.rainguard.databinding.DialogNavigationMenuBinding;
 import com.um.rainguard.databinding.PopupProfileBinding;
@@ -35,20 +39,24 @@ import com.um.rainguard.utils.NavigationHelper;
 import com.um.rainguard.utils.UIUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 public abstract class BaseActivity extends Activity {
     protected SharedPreferences preferences;
-    protected SharedPreferences dataPreferences;
     protected ReportRepository repository;
 
     protected String role;
     protected String userEmail;
+    /** users.userId for the signed-in account; reports.reporterId is compared against it. */
+    protected String userId;
+    /** The users row of the signed-in account, once Room has delivered it. */
+    protected User currentUser;
     protected String currentPage = "dashboard";
     protected String returnPage = "dashboard";
     protected String selectedReportId;
+
+    private final List<Runnable> observerDetach = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +68,6 @@ public abstract class BaseActivity extends Activity {
                 View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
 
         preferences = getSharedPreferences(Constants.PREFERENCES, MODE_PRIVATE);
-        dataPreferences = getSharedPreferences(Constants.DATA_PREFERENCES, MODE_PRIVATE);
         repository = ReportRepository.getInstance(this);
 
         role = getIntent().getStringExtra(Constants.EXTRA_ROLE);
@@ -83,6 +90,11 @@ public abstract class BaseActivity extends Activity {
             finish();
             return;
         }
+
+        // Identity comes from the signed-in e-mail for now; the users table is the record of it.
+        userId = ReportRepository.userIdForEmail(userEmail);
+        repository.ensureUser(userEmail, role);
+        observe(repository.observeUser(userId), user -> currentUser = user);
 
         currentPage = getIntent().getStringExtra(Constants.EXTRA_PAGE);
         if (currentPage == null) currentPage = getInitialPage();
@@ -288,18 +300,37 @@ public abstract class BaseActivity extends Activity {
 
         binding.btnClosePreferences.setOnClickListener(v -> sheet.dismiss());
 
-        String settingsKey = "settings." + userEmail.toLowerCase(Locale.ROOT);
-        binding.switchHeavyRain.setChecked(dataPreferences.getBoolean(settingsKey + ".heavyRain", true));
-        binding.switchFlashFlood.setChecked(dataPreferences.getBoolean(settingsKey + ".flashFlood", true));
-        binding.switchWeeklySummary.setChecked(dataPreferences.getBoolean(settingsKey + ".weekly", false));
+        // Preferences live on the users row, not in a JSON blob keyed by e-mail.
+        List<String> selectedZoneList = new ArrayList<>();
+        if (currentUser != null) {
+            binding.switchHeavyRain.setChecked(currentUser.notifyHeavyRain);
+            binding.switchFlashFlood.setChecked(currentUser.notifyFlashFlood);
+            binding.switchWeeklySummary.setChecked(currentUser.weeklySummary);
+            selectedZoneList.addAll(currentUser.zones());
+        } else {
+            binding.switchHeavyRain.setChecked(true);
+            binding.switchFlashFlood.setChecked(true);
+            binding.switchWeeklySummary.setChecked(false);
+            selectedZoneList.add("KK8");
+        }
 
-        String[] zones = {
-                "KK1", "KK2", "KK3", "KK4", "KK5", "KK6", "KK7", "KK8", "KK9",
-                "KK10", "KK11", "KK12", "Faculty buildings", "Central campus"
-        };
-        String savedZones = dataPreferences.getString(settingsKey + ".zones", "KK8|Faculty buildings");
-        List<String> selectedZoneList = new ArrayList<>(Arrays.asList(savedZones.split("\\|", -1)));
+        bindZonePills(binding, selectedZoneList);
 
+        binding.btnSavePreferences.setOnClickListener(v -> {
+            repository.savePreferences(userId,
+                    binding.switchHeavyRain.isChecked(),
+                    binding.switchFlashFlood.isChecked(),
+                    binding.switchWeeklySummary.isChecked(),
+                    selectedZoneList);
+            sheet.dismiss();
+            showToast("Preferences saved.");
+        });
+
+        sheet.setContentView(binding.getRoot());
+        sheet.show();
+    }
+
+    private void bindZonePills(BottomSheetPreferencesBinding binding, List<String> selectedZoneList) {
         LinearLayout zoneContainer = binding.zonesFlexContainer;
         zoneContainer.removeAllViews();
 
@@ -308,7 +339,7 @@ public abstract class BaseActivity extends Activity {
         int currentLineWidth = 0;
         int maxLineWidthDp = 280;
 
-        for (String zone : zones) {
+        for (String zone : CampusZones.ALL) {
             TextView zonePill = new TextView(this);
             zonePill.setText(zone);
             zonePill.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
@@ -345,20 +376,6 @@ public abstract class BaseActivity extends Activity {
         }
         zoneContainer.addView(currentRow, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
-        binding.btnSavePreferences.setOnClickListener(v -> {
-            SharedPreferences.Editor editor = dataPreferences.edit();
-            editor.putBoolean(settingsKey + ".heavyRain", binding.switchHeavyRain.isChecked());
-            editor.putBoolean(settingsKey + ".flashFlood", binding.switchFlashFlood.isChecked());
-            editor.putBoolean(settingsKey + ".weekly", binding.switchWeeklySummary.isChecked());
-            editor.putString(settingsKey + ".zones", android.text.TextUtils.join("|", selectedZoneList));
-            editor.apply();
-            sheet.dismiss();
-            showToast("Preferences saved.");
-        });
-
-        sheet.setContentView(binding.getRoot());
-        sheet.show();
     }
 
     private void updateZonePillStyle(TextView pill, boolean selected) {
@@ -385,6 +402,24 @@ public abstract class BaseActivity extends Activity {
 
     protected void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * These Activities are plain {@link Activity}s, not {@code AppCompatActivity}s, so they are not
+     * a {@code LifecycleOwner}. Observers are attached forever and detached in onDestroy instead.
+     */
+    protected <T> void observe(LiveData<T> liveData, Observer<T> observer) {
+        liveData.observeForever(observer);
+        observerDetach.add(() -> liveData.removeObserver(observer));
+    }
+
+    @Override
+    protected void onDestroy() {
+        for (Runnable detach : observerDetach) {
+            detach.run();
+        }
+        observerDetach.clear();
+        super.onDestroy();
     }
 
     @Override

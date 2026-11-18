@@ -13,8 +13,8 @@ public class Constants {
     public static final int DANGER = Color.rgb(180, 35, 24);
     public static final int SUCCESS = Color.rgb(21, 115, 71);
 
+    /** Sign-in "remember me" values only — report and preference data live in Room now. */
     public static final String PREFERENCES = "rainguard-demo-session";
-    public static final String DATA_PREFERENCES = "rainguard-demo-data";
 
     public static final String EXTRA_ROLE = "screen_role";
     public static final String EXTRA_EMAIL = "screen_email";

@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.um.rainguard.R;
-import com.um.rainguard.data.model.ReportItem;
+import com.um.rainguard.data.model.Report;
 import com.um.rainguard.databinding.ItemReportTableRowBinding;
 import com.um.rainguard.databinding.ScreenMyReportsBinding;
 import com.um.rainguard.ui.base.BaseActivity;
@@ -34,10 +34,13 @@ public class MyReportsActivity extends BaseActivity {
     @Override
     protected void initView() {
         View rootView = findViewById(R.id.main_root_container);
-        if (rootView != null) {
-            binding = ScreenMyReportsBinding.bind(rootView);
-            setupReportsUI();
-        }
+        if (rootView == null) return;
+
+        binding = ScreenMyReportsBinding.bind(rootView);
+        setupReportsUI();
+
+        observe(repository.observeReports(), reports -> updateTableResults());
+        updateTableResults();
     }
 
     protected void setupReportsUI() {
@@ -84,8 +87,6 @@ public class MyReportsActivity extends BaseActivity {
         binding.reportsStatusSpinner.setOnItemSelectedListener(spinnerListener);
         binding.reportsCategorySpinner.setOnItemSelectedListener(spinnerListener);
         binding.reportsRiskSpinner.setOnItemSelectedListener(spinnerListener);
-
-        updateTableResults();
     }
 
     private void setupSpinner(Spinner spinner, String[] options) {
@@ -95,7 +96,7 @@ public class MyReportsActivity extends BaseActivity {
     }
 
     protected void updateTableResults() {
-        if (binding == null) return;
+        if (binding == null || binding.reportsStatusSpinner.getSelectedItem() == null) return;
 
         String query = binding.reportsSearchInput.getText().toString();
         String status = binding.reportsStatusSpinner.getSelectedItem().toString();
@@ -103,7 +104,7 @@ public class MyReportsActivity extends BaseActivity {
         String risk = binding.reportsRiskSpinner.getSelectedItem().toString();
         String day = binding.reportsDateInput.getText().toString().trim();
 
-        List<ReportItem> matches = repository.visibleReports(isManagement, userEmail, query, status, category, risk, day);
+        List<Report> matches = repository.visibleReports(isManagement, userId, query, status, category, risk, day);
 
         binding.reportsHeaderSubtitle.setText(matches.size() + " reports · " +
                 (isManagement ? "Review, verify and coordinate a response" : "Updates from the maintenance team"));
@@ -113,29 +114,33 @@ public class MyReportsActivity extends BaseActivity {
             binding.reportsEmptyText.setVisibility(View.VISIBLE);
         } else {
             binding.reportsEmptyText.setVisibility(View.GONE);
-            for (ReportItem item : matches) {
+            for (Report item : matches) {
                 addTableRow(item);
             }
         }
     }
 
-    private void addTableRow(ReportItem item) {
+    private void addTableRow(Report item) {
         ItemReportTableRowBinding rowBinding = ItemReportTableRowBinding.inflate(getLayoutInflater(), binding.reportsTableBody, false);
 
-        rowBinding.rowReportId.setText(item.id);
-        rowBinding.rowReportPlace.setText(item.place);
-        rowBinding.rowReportDate.setText(UIUtils.formatDate(item.createdAt) + ", 16:12");
+        String status = UIUtils.statusLabel(item.status);
+        String risk = UIUtils.riskLabel(item.severity);
 
-        rowBinding.rowReportCategory.setText(item.category);
-        rowBinding.rowReportRisk.setText(item.risk + " risk");
-        rowBinding.rowReportRisk.setTextColor(UIUtils.riskColor(item.risk));
+        rowBinding.rowReportId.setText(UIUtils.reportCode(item.reportId));
+        rowBinding.rowReportPlace.setText(item.locationName);
+        rowBinding.rowReportDate.setText(UIUtils.formatStamp(item.createdAt));
 
-        rowBinding.rowReportStatus.setText(item.status);
-        rowBinding.rowReportStatus.setTextColor(UIUtils.statusColor(item.status));
+        rowBinding.rowReportCategory.setText(UIUtils.categoryLabel(item.category));
+        rowBinding.rowReportRisk.setText(risk + " risk");
+        rowBinding.rowReportRisk.setTextColor(UIUtils.riskColor(risk));
+
+        rowBinding.rowReportStatus.setText(status);
+        rowBinding.rowReportStatus.setTextColor(UIUtils.statusColor(status));
         rowBinding.rowReportStatus.setBackground(UIUtils.createButtonDrawable(this,
-                UIUtils.statusBgColor(item.status), UIUtils.statusBgColor(item.status), 6));
+                UIUtils.statusBgColor(status), UIUtils.statusBgColor(status), 6));
 
-        rowBinding.rowBtnViewDetails.setOnClickListener(v -> NavigationHelper.navigateTo(this, role, userEmail, "report-details", item.id, currentPage));
+        rowBinding.rowBtnViewDetails.setOnClickListener(v -> NavigationHelper.navigateTo(
+                this, role, userEmail, "report-details", item.reportId, currentPage));
 
         binding.reportsTableBody.addView(rowBinding.getRoot());
     }

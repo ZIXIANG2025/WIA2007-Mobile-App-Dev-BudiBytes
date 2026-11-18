@@ -10,7 +10,7 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.um.rainguard.data.model.ReportItem;
+import com.um.rainguard.data.model.Report;
 import com.um.rainguard.utils.Constants;
 import com.um.rainguard.utils.UIUtils;
 
@@ -19,7 +19,7 @@ import java.util.List;
 
 public class MapSketchView extends View {
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final List<ReportItem> mapReports = new ArrayList<>();
+    private final List<Report> mapReports = new ArrayList<>();
 
     public MapSketchView(Context context) {
         super(context);
@@ -40,7 +40,7 @@ public class MapSketchView extends View {
         setBackgroundColor(Color.rgb(235, 244, 246));
     }
 
-    public void setMapReports(List<ReportItem> reports) {
+    public void setMapReports(List<Report> reports) {
         this.mapReports.clear();
         if (reports != null) {
             this.mapReports.addAll(reports);
@@ -87,12 +87,12 @@ public class MapSketchView extends View {
         paint.setStyle(Paint.Style.FILL);
 
         for (int i = 0; i < mapReports.size() && i < positions.length; i++) {
-            ReportItem item = mapReports.get(i);
+            Report item = mapReports.get(i);
             float px = width * positions[i][0];
             float py = height * positions[i][1];
 
             // Outer glow circle
-            paint.setColor(UIUtils.riskColor(item.risk));
+            paint.setColor(UIUtils.riskColor(item.severity));
             canvas.drawCircle(px, py, dp(16), paint);
 
             // Inner symbol drop circle
@@ -101,7 +101,8 @@ public class MapSketchView extends View {
 
             // Draw tooltip label for main pin
             if (i == 0) {
-                String labelText = item.place.length() > 16 ? item.place.substring(0, 16) + "..." : item.place;
+                String place = item.locationName;
+                String labelText = place.length() > 16 ? place.substring(0, 16) + "..." : place;
                 paint.setTextSize(dp(11));
                 paint.setTypeface(Typeface.DEFAULT_BOLD);
                 float textWidth = paint.measureText(labelText);

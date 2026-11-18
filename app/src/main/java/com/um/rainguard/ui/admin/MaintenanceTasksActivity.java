@@ -5,7 +5,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 import com.um.rainguard.R;
-import com.um.rainguard.data.model.ReportItem;
+import com.um.rainguard.data.model.Report;
+import com.um.rainguard.data.model.ReportStatus;
 import com.um.rainguard.databinding.ItemTaskCardBinding;
 import com.um.rainguard.databinding.ScreenMaintenanceTasksBinding;
 import com.um.rainguard.ui.base.BaseActivity;
@@ -30,10 +31,13 @@ public class MaintenanceTasksActivity extends BaseActivity {
     @Override
     protected void initView() {
         View rootView = findViewById(R.id.main_root_container);
-        if (rootView != null) {
-            binding = ScreenMaintenanceTasksBinding.bind(rootView);
-            setupTasksUI();
-        }
+        if (rootView == null) return;
+
+        binding = ScreenMaintenanceTasksBinding.bind(rootView);
+        setupTasksUI();
+
+        observe(repository.observeReports(), reports -> updateTasksList());
+        updateTasksList();
     }
 
     private void setupTasksUI() {
@@ -57,21 +61,19 @@ public class MaintenanceTasksActivity extends BaseActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-
-        updateTasksList();
     }
 
     private void updateTasksList() {
-        if (binding == null) return;
+        if (binding == null || binding.tasksStatusSpinner.getSelectedItem() == null) return;
 
         binding.tasksContainer.removeAllViews();
         String selectedFilter = binding.tasksStatusSpinner.getSelectedItem().toString();
 
         int count = 0;
-        List<ReportItem> reports = repository.getReports();
-        for (ReportItem item : reports) {
-            if (!"Verified".equals(item.status) && item.team == null) continue;
-            String taskStatus = item.taskStatus == null ? "Awaiting Assignment" : item.taskStatus;
+        List<Report> reports = repository.getReports();
+        for (Report item : reports) {
+            if (item.status != ReportStatus.VERIFIED && item.assignedTeam == null) continue;
+            String taskStatus = UIUtils.taskStatusLabel(item.taskStatus);
             if (!"All".equals(selectedFilter) && !selectedFilter.equals(taskStatus)) continue;
 
             addTaskCard(item, taskStatus);
@@ -85,18 +87,20 @@ public class MaintenanceTasksActivity extends BaseActivity {
         }
     }
 
-    private void addTaskCard(ReportItem item, String taskStatus) {
+    private void addTaskCard(Report item, String taskStatus) {
         ItemTaskCardBinding cardBinding = ItemTaskCardBinding.inflate(getLayoutInflater(), binding.tasksContainer, false);
+        String status = UIUtils.statusLabel(item.status);
 
-        cardBinding.taskTitle.setText(item.id + " · " + item.place);
-        cardBinding.taskTeam.setText(item.team == null ? "No team allocated" : item.team);
+        cardBinding.taskTitle.setText(UIUtils.reportCode(item.reportId) + " · " + item.locationName);
+        cardBinding.taskTeam.setText(item.assignedTeam == null ? "No team allocated" : item.assignedTeam);
 
-        cardBinding.taskStatus.setText(taskStatus + " · " + item.status);
-        cardBinding.taskStatus.setTextColor(UIUtils.statusColor(item.status));
+        cardBinding.taskStatus.setText(taskStatus + " · " + status);
+        cardBinding.taskStatus.setTextColor(UIUtils.statusColor(status));
 
         cardBinding.taskInstructions.setText(item.instructions == null ? "" : item.instructions);
 
-        cardBinding.getRoot().setOnClickListener(v -> NavigationHelper.navigateTo(this, role, userEmail, "report-details", item.id, currentPage));
+        cardBinding.getRoot().setOnClickListener(v -> NavigationHelper.navigateTo(
+                this, role, userEmail, "report-details", item.reportId, currentPage));
 
         binding.tasksContainer.addView(cardBinding.getRoot());
     }
