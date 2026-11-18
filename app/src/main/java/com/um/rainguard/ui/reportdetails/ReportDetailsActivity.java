@@ -9,8 +9,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.um.rainguard.R;
-import com.um.rainguard.data.model.HistoryEntry;
-import com.um.rainguard.data.model.ReportItem;
+import com.um.rainguard.data.model.AiTriage;
+import com.um.rainguard.data.model.MaintenanceTeams;
+import com.um.rainguard.data.model.Report;
+import com.um.rainguard.data.model.ReportStatus;
+import com.um.rainguard.data.model.TaskStatus;
+import com.um.rainguard.data.model.VerificationLog;
 import com.um.rainguard.databinding.DialogAdminActionBinding;
 import com.um.rainguard.databinding.ItemHistoryEntryBinding;
 import com.um.rainguard.databinding.ScreenReportDetailsBinding;
@@ -25,7 +29,9 @@ import java.util.Locale;
 
 public class ReportDetailsActivity extends BaseActivity {
     private ScreenReportDetailsBinding binding;
-    private ReportItem selectedReport;
+    private Report selectedReport;
+    private AiTriage triage;
+    private List<VerificationLog> timeline;
 
     @Override
     protected int getLayoutResourceId() {
@@ -39,48 +45,72 @@ public class ReportDetailsActivity extends BaseActivity {
 
     @Override
     protected void initView() {
-        selectedReport = repository.findReport(selectedReportId);
-        if (selectedReport == null) {
-            NavigationHelper.navigateTo(this, role, userEmail, returnPage, null, returnPage);
-            finish();
-            return;
-        }
-
         View rootView = findViewById(R.id.main_root_container);
-        if (rootView != null) {
-            binding = ScreenReportDetailsBinding.bind(rootView);
+        if (rootView == null) return;
+
+        binding = ScreenReportDetailsBinding.bind(rootView);
+
+        selectedReport = repository.findReport(selectedReportId);
+        if (selectedReport != null) {
             setupReportDetailsUI();
         }
+
+        observe(repository.observeReport(selectedReportId), report -> {
+            if (report == null) {
+                // The report was deleted or the id is stale — go back rather than show an empty page.
+                NavigationHelper.navigateTo(this, role, userEmail, returnPage, null, returnPage);
+                finish();
+                return;
+            }
+            selectedReport = report;
+            setupReportDetailsUI();
+        });
+
+        observe(repository.observeTimeline(selectedReportId), logs -> {
+            timeline = logs;
+            setupHistorySection();
+        });
+
+        observe(repository.observeTriage(selectedReportId), suggestion -> {
+            triage = suggestion;
+            setupAiSection();
+        });
     }
 
     private void setupReportDetailsUI() {
         if (binding == null || selectedReport == null) return;
 
-        binding.detailHeaderInfo.setText(selectedReport.id + " · " + UIUtils.formatDate(selectedReport.createdAt) + ", 16:12 MYT");
-        binding.detailPlaceTitle.setText(selectedReport.place);
+        String status = UIUtils.statusLabel(selectedReport.status);
+        String risk = UIUtils.riskLabel(selectedReport.severity);
 
-        binding.detailRiskTag.setText(selectedReport.risk + " risk");
-        binding.detailRiskTag.setTextColor(UIUtils.riskColor(selectedReport.risk));
+        binding.detailHeaderInfo.setText(UIUtils.reportCode(selectedReport.reportId) + " · "
+                + UIUtils.formatStamp(selectedReport.createdAt) + " MYT");
+        binding.detailPlaceTitle.setText(selectedReport.locationName);
 
-        binding.detailStatusPill.setText(selectedReport.status);
-        binding.detailStatusPill.setTextColor(UIUtils.statusColor(selectedReport.status));
+        binding.detailRiskTag.setText(risk + " risk");
+        binding.detailRiskTag.setTextColor(UIUtils.riskColor(risk));
+
+        binding.detailStatusPill.setText(status);
+        binding.detailStatusPill.setTextColor(UIUtils.statusColor(status));
         binding.detailStatusPill.setBackground(UIUtils.createButtonDrawable(this,
-                UIUtils.statusBgColor(selectedReport.status), UIUtils.statusBgColor(selectedReport.status), 6));
+                UIUtils.statusBgColor(status), UIUtils.statusBgColor(status), 6));
 
-        binding.detailOriginalCategory.setText("ORIGINAL REPORT · " + selectedReport.category.toUpperCase(Locale.ROOT));
+        binding.detailOriginalCategory.setText("ORIGINAL REPORT · "
+                + UIUtils.categoryLabel(selectedReport.category).toUpperCase(Locale.ROOT));
         binding.detailDescription.setText(selectedReport.description);
 
         setupPhotos();
         setupMaintenanceSection();
-        setupHistorySection();
 
         if (isAdmin()) {
             binding.detailCommunitySection.setVisibility(View.GONE);
             binding.detailAdminSection.setVisibility(View.VISIBLE);
-            setupAdminReviewSection();
+            setupAiSection();
+            setupDuplicateSuggestions();
+            setupAdminActionButtons();
         } else {
             binding.detailAdminSection.setVisibility(View.GONE);
-            if (!"Resolved".equals(selectedReport.status) && !"Rejected".equals(selectedReport.status)) {
+            if (selectedReport.status != ReportStatus.RESOLVED && selectedReport.status != ReportStatus.REJECTED) {
                 binding.detailCommunitySection.setVisibility(View.VISIBLE);
                 setupCommunitySection();
             } else {
@@ -123,84 +153,92 @@ public class ReportDetailsActivity extends BaseActivity {
     }
 
     private void setupMaintenanceSection() {
-        if (selectedReport.team != null || selectedReport.taskStatus != null) {
+        if (selectedReport.assignedTeam != null || selectedReport.taskStatus != null) {
             binding.detailMaintenanceContainer.setVisibility(View.VISIBLE);
-            binding.detailTeamText.setText("Responsible team: " + (selectedReport.team == null ? "JPPHB Drainage Team" : selectedReport.team));
-            binding.detailTaskStatusPill.setText(selectedReport.taskStatus == null ? "Inspection in Progress" : selectedReport.taskStatus);
+            binding.detailTeamText.setText("Responsible team: "
+                    + (selectedReport.assignedTeam == null ? "JPPHB Drainage Team" : selectedReport.assignedTeam));
+            binding.detailTaskStatusPill.setText(UIUtils.taskStatusLabel(selectedReport.taskStatus));
         } else {
             binding.detailMaintenanceContainer.setVisibility(View.GONE);
         }
     }
 
+    /** The timeline is the report's own creation, followed by every verification_logs row. */
     private void setupHistorySection() {
+        if (binding == null || selectedReport == null) return;
+
         binding.detailHistoryContainer.removeAllViews();
-        for (HistoryEntry entry : selectedReport.history) {
+
+        ItemHistoryEntryBinding created = ItemHistoryEntryBinding.inflate(getLayoutInflater(), binding.detailHistoryContainer, false);
+        created.historyText.setText("Report " + UIUtils.reportCode(selectedReport.reportId) + " received.");
+        created.historyDate.setText(UIUtils.formatStamp(selectedReport.createdAt) + " MYT");
+        binding.detailHistoryContainer.addView(created.getRoot());
+
+        if (timeline == null) return;
+        for (VerificationLog entry : timeline) {
             ItemHistoryEntryBinding historyBinding = ItemHistoryEntryBinding.inflate(getLayoutInflater(), binding.detailHistoryContainer, false);
-            historyBinding.historyText.setText(entry.text);
-            historyBinding.historyDate.setText(entry.date + " MYT");
+            historyBinding.historyText.setText(entry.remarks);
+            historyBinding.historyDate.setText(UIUtils.formatStamp(entry.createdAt) + " MYT");
             binding.detailHistoryContainer.addView(historyBinding.getRoot());
         }
     }
 
     private void setupCommunitySection() {
-        binding.btnDetailStillThere.setText("Still There (" + selectedReport.votes + ")");
-        binding.btnDetailCleared.setText("Cleared (" + selectedReport.cleared + ")");
+        binding.btnDetailStillThere.setText("Still There (" + selectedReport.stillThereCount + ")");
+        binding.btnDetailCleared.setText("Cleared (" + selectedReport.clearedCount + ")");
 
         binding.btnDetailStillThere.setOnClickListener(v -> {
-            selectedReport.votes++;
-            repository.persistReports();
+            repository.addStillThere(selectedReport.reportId);
             showToast("Still There observation recorded.");
-            setupReportDetailsUI();
         });
 
         binding.btnDetailCleared.setOnClickListener(v -> {
-            selectedReport.cleared++;
-            repository.persistReports();
+            repository.addCleared(selectedReport.reportId);
             showToast("Cleared observation recorded.");
-            setupReportDetailsUI();
         });
     }
 
-    private void setupAdminReviewSection() {
-        binding.detailAiSummaryText.setText(selectedReport.summary == null ? "Generate a draft summary to support your review." : selectedReport.summary);
-        binding.btnGenerateSummary.setText(selectedReport.summary == null ? "Generate Summary" : "Regenerate Summary");
+    /** Module 3 lives in ai_triage; the admin page only reads it. */
+    private void setupAiSection() {
+        if (binding == null || selectedReport == null || !isAdmin()) return;
+
+        boolean hasSummary = triage != null && triage.summary != null && !triage.summary.isEmpty();
+        binding.detailAiSummaryText.setText(hasSummary
+                ? triage.summary
+                : "Generate a draft summary to support your review.");
+        binding.btnGenerateSummary.setText(hasSummary ? "Regenerate Summary" : "Generate Summary");
 
         binding.btnGenerateSummary.setOnClickListener(v -> {
-            selectedReport.summary = selectedReport.category + " was reported at " + selectedReport.place + ". "
-                    + selectedReport.description + " The affected area may create a slipping hazard and disrupt "
-                    + "pedestrian movement. An on-site inspection is recommended. This is a demo "
-                    + "rule-based summary; administrator review is required.";
-            repository.persistReports();
+            repository.generateSummary(selectedReport.reportId);
             showToast("Demo report summary generated. No status change.");
-            setupReportDetailsUI();
         });
 
-        binding.detailSuggestedRiskText.setText("Suggested risk: " + selectedReport.risk);
-
-        setupDuplicateSuggestions();
-        setupAdminActionButtons();
+        String suggested = triage != null && triage.suggestedSeverity != null
+                ? UIUtils.riskLabel(triage.suggestedSeverity)
+                : UIUtils.riskLabel(selectedReport.severity);
+        binding.detailSuggestedRiskText.setText("Suggested risk: " + suggested);
     }
 
     private void setupDuplicateSuggestions() {
+        if (binding == null || selectedReport == null) return;
+
         binding.detailDuplicatesContainer.removeAllViews();
-        int duplicates = 0;
-        List<ReportItem> reports = repository.getReports();
-        for (ReportItem other : reports) {
-            if (other != selectedReport && other.place.equals(selectedReport.place)
-                    && other.category.equals(selectedReport.category)
-                    && !"Rejected".equals(other.status)) {
-                duplicates++;
-                TextView dupTv = new TextView(this);
-                dupTv.setText(other.id + " · " + other.category + " · " + other.status);
-                dupTv.setTextColor(Constants.MUTED);
-                dupTv.setTextSize(12);
-                binding.detailDuplicatesContainer.addView(dupTv);
-            }
+        List<Report> duplicates = repository.findDuplicates(selectedReport);
+
+        for (Report other : duplicates) {
+            TextView dupTv = new TextView(this);
+            dupTv.setText(UIUtils.reportCode(other.reportId) + " · "
+                    + UIUtils.categoryLabel(other.category) + " · " + UIUtils.statusLabel(other.status));
+            dupTv.setTextColor(Constants.MUTED);
+            dupTv.setTextSize(12);
+            binding.detailDuplicatesContainer.addView(dupTv);
         }
-        binding.detailDuplicateBox.setVisibility(duplicates > 0 ? View.VISIBLE : View.GONE);
+        binding.detailDuplicateBox.setVisibility(duplicates.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     private void setupAdminActionButtons() {
+        if (binding == null || selectedReport == null) return;
+
         binding.btnAdminUnderReview.setVisibility(View.GONE);
         binding.btnAdminVerify.setVisibility(View.GONE);
         binding.btnAdminReject.setVisibility(View.GONE);
@@ -210,20 +248,19 @@ public class ReportDetailsActivity extends BaseActivity {
         binding.btnAdminAddPhoto.setVisibility(View.GONE);
         binding.detailClosedText.setVisibility(View.GONE);
 
-        if ("Submitted".equals(selectedReport.status) || "Under Review".equals(selectedReport.status)) {
-            if ("Submitted".equals(selectedReport.status)) {
-                binding.btnAdminUnderReview.setVisibility(View.VISIBLE);
-                binding.btnAdminUnderReview.setOnClickListener(v -> applyReportAction("review", null, null, null));
-            }
+        if (selectedReport.status == ReportStatus.PENDING_MODERATOR) {
             binding.btnAdminVerify.setVisibility(View.VISIBLE);
-            binding.btnAdminVerify.setOnClickListener(v -> applyReportAction("verify", null, null, null));
+            binding.btnAdminVerify.setOnClickListener(v -> {
+                repository.verify(selectedReport.reportId, userId);
+                showToast("Report verified.");
+            });
 
             binding.btnAdminReject.setVisibility(View.VISIBLE);
             binding.btnAdminReject.setOnClickListener(v -> showActionDialog("reject"));
-        } else if ("Verified".equals(selectedReport.status)) {
+        } else if (selectedReport.status == ReportStatus.VERIFIED) {
             binding.btnAdminAssign.setVisibility(View.VISIBLE);
             binding.btnAdminAssign.setOnClickListener(v -> showActionDialog("assign"));
-        } else if (selectedReport.team != null && !"Resolved".equals(selectedReport.status)) {
+        } else if (selectedReport.assignedTeam != null && selectedReport.status != ReportStatus.RESOLVED) {
             binding.btnAdminUpdateProgress.setVisibility(View.VISIBLE);
             binding.btnAdminUpdateProgress.setOnClickListener(v -> showActionDialog("progress"));
 
@@ -248,17 +285,15 @@ public class ReportDetailsActivity extends BaseActivity {
         if ("assign".equals(action)) {
             dialogBinding.dialogTeamLabel.setVisibility(View.VISIBLE);
             dialogBinding.dialogTeamSpinner.setVisibility(View.VISIBLE);
-            setupSpinner(dialogBinding.dialogTeamSpinner, new String[]{
-                    "JPPHB Drainage Team", "Campus Facilities Team",
-                    "Landscape & Grounds Team", "Maintenance Officer Ahmad"
-            });
+            setupSpinner(dialogBinding.dialogTeamSpinner,
+                    MaintenanceTeams.ALL.toArray(new String[0]));
         } else if ("progress".equals(action)) {
             dialogBinding.dialogStatusLabel.setVisibility(View.VISIBLE);
             dialogBinding.dialogStatusSpinner.setVisibility(View.VISIBLE);
             String[] progressOptions = new String[]{"Assigned", "Inspection in Progress", "Repair in Progress"};
             setupSpinner(dialogBinding.dialogStatusSpinner, progressOptions);
             if (selectedReport.taskStatus != null) {
-                int index = Arrays.asList(progressOptions).indexOf(selectedReport.taskStatus);
+                int index = Arrays.asList(progressOptions).indexOf(UIUtils.taskStatusLabel(selectedReport.taskStatus));
                 if (index >= 0) dialogBinding.dialogStatusSpinner.setSelection(index);
             }
         }
@@ -276,7 +311,7 @@ public class ReportDetailsActivity extends BaseActivity {
                         : "assign".equals(action) ? "Assign maintenance"
                         : "resolve".equals(action) ? "Complete task & resolve report"
                         : "Update maintenance progress")
-                .setMessage(selectedReport.id + " · " + selectedReport.place)
+                .setMessage(UIUtils.reportCode(selectedReport.reportId) + " · " + selectedReport.locationName)
                 .setView(dialogBinding.getRoot())
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("reject".equals(action) ? "Confirm rejection"
@@ -292,8 +327,10 @@ public class ReportDetailsActivity extends BaseActivity {
                         : "Please include a reason or work notes.");
                 return;
             }
-            String selectedTeam = dialogBinding.dialogTeamSpinner.getVisibility() == View.VISIBLE ? dialogBinding.dialogTeamSpinner.getSelectedItem().toString() : null;
-            String selectedTaskStatus = dialogBinding.dialogStatusSpinner.getVisibility() == View.VISIBLE ? dialogBinding.dialogStatusSpinner.getSelectedItem().toString() : null;
+            String selectedTeam = dialogBinding.dialogTeamSpinner.getVisibility() == View.VISIBLE
+                    ? dialogBinding.dialogTeamSpinner.getSelectedItem().toString() : null;
+            String selectedTaskStatus = dialogBinding.dialogStatusSpinner.getVisibility() == View.VISIBLE
+                    ? dialogBinding.dialogStatusSpinner.getSelectedItem().toString() : null;
 
             boolean saved = applyReportAction(action, notes, selectedTeam, selectedTaskStatus);
             if (saved) dialog.dismiss();
@@ -308,43 +345,31 @@ public class ReportDetailsActivity extends BaseActivity {
         spinner.setAdapter(adapter);
     }
 
-    private boolean applyReportAction(String action, String notes, String team, String taskStatus) {
+    /**
+     * Module 4: every branch is one transaction in the repository (status + verification_logs row
+     * together), and the screen simply re-renders when Room reports the change.
+     */
+    private boolean applyReportAction(String action, String notes, String team, String taskStatusLabel) {
         if (!isAdmin()) {
             showToast("Administrators only.");
             return false;
         }
 
-        if ("review".equals(action) || "verify".equals(action)) {
-            selectedReport.status = "review".equals(action) ? "Under Review" : "Verified";
-            selectedReport.addHistory(UIUtils.timestamp(), "review".equals(action)
-                    ? "Report is under administrator review."
-                    : "Report verified by maintenance administrator.");
-        } else if ("reject".equals(action)) {
-            selectedReport.status = "Rejected";
-            selectedReport.addHistory(UIUtils.timestamp(), "Rejected: " + notes);
+        String reportId = selectedReport.reportId;
+
+        if ("reject".equals(action)) {
+            repository.reject(reportId, userId, notes);
         } else if ("assign".equals(action)) {
-            selectedReport.status = "In progress";
-            selectedReport.team = team;
-            selectedReport.instructions = notes;
-            selectedReport.taskStatus = "Assigned";
-            selectedReport.addHistory(UIUtils.timestamp(), "Maintenance assigned to " + team + ". Instructions: " + notes);
+            repository.assign(reportId, userId, team, notes);
         } else if ("progress".equals(action)) {
-            selectedReport.taskStatus = taskStatus;
-            selectedReport.addHistory(UIUtils.timestamp(), taskStatus + ": " + notes);
+            TaskStatus taskStatus = UIUtils.taskStatusFromLabel(taskStatusLabel);
+            repository.updateProgress(reportId, userId, taskStatus, notes);
         } else if ("resolve".equals(action)) {
-            selectedReport.status = "Resolved";
-            selectedReport.taskStatus = "Completed";
-            selectedReport.resolution = notes;
-            selectedReport.resolvedAt = UIUtils.timestamp();
-            selectedReport.addHistory(UIUtils.timestamp(), "Task Completed; report Resolved. " + notes);
+            repository.resolve(reportId, userId, notes);
         }
 
-        repository.persistReports();
-        showToast("verify".equals(action) ? "Report verified."
-                : "review".equals(action) ? "Report moved to Under Review."
+        showToast("reject".equals(action) ? "Report rejected."
                 : "Report update saved.");
-
-        setupReportDetailsUI();
         return true;
     }
 
@@ -360,14 +385,9 @@ public class ReportDetailsActivity extends BaseActivity {
         } catch (SecurityException ignored) {
         }
 
-        if (requestCode == Constants.REQUEST_COMPLETION_PHOTO) {
-            if (selectedReport != null) {
-                selectedReport.completionPhotoUri = uri.toString();
-                selectedReport.addHistory(UIUtils.timestamp(), "Inspection / completion photo attached.");
-                repository.persistReports();
-                showToast("Maintenance photo attached.");
-                setupReportDetailsUI();
-            }
+        if (requestCode == Constants.REQUEST_COMPLETION_PHOTO && selectedReport != null) {
+            repository.attachCompletionPhoto(selectedReport.reportId, userId, uri.toString());
+            showToast("Maintenance photo attached.");
         }
     }
 }

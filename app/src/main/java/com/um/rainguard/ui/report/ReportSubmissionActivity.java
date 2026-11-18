@@ -8,16 +8,14 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.um.rainguard.R;
-import com.um.rainguard.data.model.ReportItem;
+import com.um.rainguard.data.model.Report;
+import com.um.rainguard.data.model.ReportCategory;
+import com.um.rainguard.data.model.Severity;
 import com.um.rainguard.databinding.ScreenReportSubmissionBinding;
 import com.um.rainguard.ui.base.BaseActivity;
 import com.um.rainguard.utils.Constants;
 import com.um.rainguard.utils.NavigationHelper;
 import com.um.rainguard.utils.UIUtils;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 public class ReportSubmissionActivity extends BaseActivity {
     private ScreenReportSubmissionBinding binding;
@@ -36,10 +34,10 @@ public class ReportSubmissionActivity extends BaseActivity {
     @Override
     protected void initView() {
         View rootView = findViewById(R.id.main_root_container);
-        if (rootView != null) {
-            binding = ScreenReportSubmissionBinding.bind(rootView);
-            setupReportFormUI();
-        }
+        if (rootView == null) return;
+
+        binding = ScreenReportSubmissionBinding.bind(rootView);
+        setupReportFormUI();
     }
 
     private void setupReportFormUI() {
@@ -55,12 +53,15 @@ public class ReportSubmissionActivity extends BaseActivity {
         setupSpinner(binding.riskSpinner, new String[]{"Medium", "Low", "High"});
 
         binding.btnConfirmExisting.setOnClickListener(v -> {
-            ReportItem existing = repository.findReport("RG-1042");
+            String place = binding.placeSpinner.getSelectedItem().toString();
+            ReportCategory category = UIUtils.categoryFromLabel(binding.categorySpinner.getSelectedItem().toString());
+            Report existing = repository.findSimilar(place, category);
             if (existing != null) {
-                existing.votes++;
-                repository.persistReports();
+                repository.addStillThere(existing.reportId);
+                showToast("Existing report confirmed.");
+            } else {
+                showToast("No similar open report. Submit a new one.");
             }
-            showToast("Existing report confirmed.");
             NavigationHelper.navigateTo(this, role, userEmail, "reports", null, "report");
             finish();
         });
@@ -93,32 +94,19 @@ public class ReportSubmissionActivity extends BaseActivity {
         spinner.setAdapter(adapter);
     }
 
-    private void createReport(String place, String category, String risk, String details) {
+    private void createReport(String place, String categoryLabel, String riskLabel, String details) {
         if (isAdmin()) {
             showToast("Campus users only.");
             return;
         }
 
-        int nextId = 1042;
-        for (ReportItem item : repository.getReports()) {
-            try {
-                nextId = Math.max(nextId, Integer.parseInt(item.id.replace("RG-", "")));
-            } catch (NumberFormatException ignored) {
-            }
-        }
+        ReportCategory category = UIUtils.categoryFromLabel(categoryLabel);
+        Severity severity = UIUtils.severityFromLabel(riskLabel);
+        String zone = UIUtils.zoneForPlace(place);
+        String photoUri = selectedPhoto == null ? null : selectedPhoto.toString();
 
-        String categoryLabel = "Overflow".equals(category) ? "Overflowing drain" : category;
-        ReportItem created = new ReportItem("RG-" + (nextId + 1), place, category, categoryLabel,
-                "Submitted", risk, "Just now", 0, 0, details, userEmail,
-                new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).format(new Date()),
-                null, null, null);
-
-        if (selectedPhoto != null) {
-            created.photoUri = selectedPhoto.toString();
-        }
-
-        created.addHistory(UIUtils.timestamp(), "Report submitted. Awaiting administrator review.");
-        repository.addReport(created);
+        // The repository stores the report, writes the demo AI row and moves it to the review queue.
+        repository.createReport(userId, place, zone, category, severity, details, photoUri);
 
         selectedPhoto = null;
         showToast("Report submitted. Awaiting administrator review.");

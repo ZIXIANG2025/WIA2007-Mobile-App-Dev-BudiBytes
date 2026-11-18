@@ -8,15 +8,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.um.rainguard.R;
-import com.um.rainguard.data.model.HistoryEntry;
-import com.um.rainguard.data.model.ReportItem;
+import com.um.rainguard.data.model.VerificationLog;
 import com.um.rainguard.databinding.ItemActivityEntryBinding;
 import com.um.rainguard.databinding.ScreenAnalyticsBinding;
 import com.um.rainguard.ui.base.BaseActivity;
 import com.um.rainguard.utils.Constants;
 import com.um.rainguard.utils.UIUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AnalyticsActivity extends BaseActivity {
@@ -35,25 +33,29 @@ public class AnalyticsActivity extends BaseActivity {
     @Override
     protected void initView() {
         View rootView = findViewById(R.id.main_root_container);
-        if (rootView != null) {
-            binding = ScreenAnalyticsBinding.bind(rootView);
-            setupAnalyticsUI();
-        }
-    }
+        if (rootView == null) return;
 
-    private void setupAnalyticsUI() {
-        if (binding == null) return;
+        binding = ScreenAnalyticsBinding.bind(rootView);
+
+        observe(repository.observeReports(), reports -> {
+            setupStatusBreakdown();
+            binding.analyticsTasksSummaryText.setText("Maintenance completed: "
+                    + repository.countTasksCompleted() + " / " + repository.countTasksAssigned() + " tasks");
+        });
+        observe(repository.observeActivity(100), this::renderRecentActivity);
 
         setupStatusBreakdown();
-        binding.analyticsTasksSummaryText.setText("Maintenance completed: " + repository.countTasksCompleted() + " / " + repository.countTasksAssigned() + " tasks");
-        setupRecentActivity();
+        binding.analyticsTasksSummaryText.setText("Maintenance completed: "
+                + repository.countTasksCompleted() + " / " + repository.countTasksAssigned() + " tasks");
     }
 
     private void setupStatusBreakdown() {
+        if (binding == null) return;
+
         binding.analyticsStatusContainer.removeAllViews();
 
         String[] statuses = {"Submitted", "Under Review", "Verified", "In progress", "Resolved", "Rejected"};
-        int totalReports = Math.max(1, repository.getReports().size());
+        int totalReports = Math.max(1, repository.countAll());
 
         for (String status : statuses) {
             int count = repository.countStatus(status);
@@ -90,36 +92,26 @@ public class AnalyticsActivity extends BaseActivity {
         }
     }
 
-    private void setupRecentActivity() {
+    private void renderRecentActivity(List<VerificationLog> logs) {
+        if (binding == null) return;
+
         binding.analyticsActivityContainer.removeAllViews();
 
-        List<HistoryEntry> events = new ArrayList<>();
-        for (ReportItem item : repository.getReports()) {
-            for (HistoryEntry entry : item.history) {
-                entry.reportId = item.id;
-                events.add(entry);
-            }
-        }
-        events.sort((left, right) -> right.date.compareTo(left.date));
-
-        int count = 0;
-        int limit = 100;
-        for (HistoryEntry entry : events) {
-            if (count++ >= limit) break;
-
-            ItemActivityEntryBinding entryBinding = ItemActivityEntryBinding.inflate(getLayoutInflater(), binding.analyticsActivityContainer, false);
-            entryBinding.activityText.setText(entry.reportId + " · " + entry.text);
-            entryBinding.activityDate.setText(entry.date);
-
-            binding.analyticsActivityContainer.addView(entryBinding.getRoot());
-        }
-
-        if (events.isEmpty()) {
+        if (logs == null || logs.isEmpty()) {
             TextView emptyView = new TextView(this);
             emptyView.setText("No activity recorded.");
             emptyView.setTextColor(Constants.MUTED);
             emptyView.setTextSize(13);
             binding.analyticsActivityContainer.addView(emptyView);
+            return;
+        }
+
+        for (VerificationLog entry : logs) {
+            ItemActivityEntryBinding entryBinding = ItemActivityEntryBinding.inflate(getLayoutInflater(), binding.analyticsActivityContainer, false);
+            entryBinding.activityText.setText(UIUtils.reportCode(entry.reportId) + " · " + entry.remarks);
+            entryBinding.activityDate.setText(UIUtils.formatStamp(entry.createdAt));
+
+            binding.analyticsActivityContainer.addView(entryBinding.getRoot());
         }
     }
 }
